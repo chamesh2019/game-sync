@@ -44,8 +44,8 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('gameState', {
             user_id: socket.id,
             pos: {
-                x: -100,
-                y: -100
+                x: '-100px',
+                y: '-100px'
             },
             color: '#ffffff'
         });

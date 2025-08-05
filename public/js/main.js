@@ -52,14 +52,6 @@ function gameLoop() {
 
     if (dx !== 0 || dy !== 0) {
         moveCharacter(character, x + dx, y + dy);
-        sendGameState({
-            user_id: user_id,
-            pos: {
-                x: character.style.left,
-                y: character.style.top
-            },
-            color: character.style.backgroundColor
-        })
     }
 
     requestAnimationFrame(gameLoop);
@@ -68,8 +60,24 @@ function gameLoop() {
 screen.addEventListener('keydown', handleKeyDown);
 screen.addEventListener('keyup', handleKeyUp);
 
-setTimeout(() => {
+(async function waitForSocketId() {
+    while (!socket.id) {
+        await sleep(100);
+    }
     user_id = socket.id;
     createCharacter(user_id);
     gameLoop();
-}, 500);
+
+    setInterval(() => {
+        const character = document.getElementById(user_id);
+        sendGameState({
+            user_id: user_id,
+            pos: {
+                x: character.style.left,
+                y: character.style.top
+            },
+            color: character.style.backgroundColor
+        })
+    }, 50);
+})();
+

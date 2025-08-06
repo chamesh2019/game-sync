@@ -7,10 +7,10 @@
     "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["websocket", "express", "socket.io", "game-sync", "real-time"],
+  "keywords": ["multiplayer", "tank-shooter", "websocket", "express", "socket.io", "game", "real-time", "bullet-physics", "collision-detection"],
   "author": "",
   "license": "ISC",
-  "description": "A Node.js project combining Express web server with Socket.io WebSocket functionality for real-time communication",
+  "description": "A real-time multiplayer tank shooter game with bullet physics, collision detection, and Socket.io WebSocket communication",
   "dependencies": {
     "express": "^5.1.0",
     "socket.io": "^4.8.1"

@@ -2,4 +2,54 @@
     width: 50px;
     height: 50px;
     border-radius: 10px;
+    position: relative; /* Ensure proper positioning context */
+}
+
+.gun-barrel {
+    position: absolute;
+    width: 6px;
+    height: 55px;
+    background-color: #8B4513;
+    border-radius: 3px;
+    left: 50%;
+    top: 50%;
+    margin-left: -3px; /* Center horizontally (half of width) */
+    margin-top: -55px; /* Position so bottom is at character center */
+    transition: transform 0.05s ease-out; /* Smooth rotation */
+    pointer-events: none; /* Prevent barrel from interfering with mouse events */
+}
+
+.gun-head {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #FF0000; /* Red color for the gun head */
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    margin-left: -10px; /* Center horizontally (half of width) */
+    margin-top: -10px; /* Center vertically (half of height) */
+    z-index: 2; /* Ensure it appears above the barrel */
+}
+
+.bullet {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background-color: #900c0c; /* Gold color for bullets */
+    border-radius: 50%;
+    z-index: 3; /* Ensure bullets appear above everything */
+    pointer-events: none; /* Prevent bullets from interfering with mouse events */
+    transition: all 0.1s ease-out; /* Smooth scaling for explosion effect */
+}
+
+/* Hit effect animation */
+@keyframes hitFlash {
+    0% { background-color: inherit; }
+    50% { background-color: #ff4444; }
+    100% { background-color: inherit; }
+}
+
+.character.hit {
+    animation: hitFlash 0.3s ease-in-out;
 }

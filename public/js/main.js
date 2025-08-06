@@ -5,6 +5,10 @@ function sleep(ms) {
 const screen = document.getElementById('screen');
 let user_id = 0;
 
+let bulletList = [];
+let lastBulletTime = 0;
+const BULLET_COOLDOWN = 200; // 200ms between bullets
+
 function createCharacter(user_id){
     const character = document.createElement('div');
     character.className = 'character';
@@ -37,6 +41,54 @@ function handleKeyUp(event) {
     pressedKeys[event.key.toLowerCase()] = false;
 }
 
+function fireBullet() {
+    const now = Date.now();
+    if (now - lastBulletTime < BULLET_COOLDOWN) return; // Rate limiting
+    
+    const character = document.getElementById(user_id);
+    const characterCenterX = parseInt(character.style.left) + 25; // Center of 50px character
+    const characterCenterY = parseInt(character.style.top) + 25; // Center of 50px character
+
+    const bulletData = {
+        id: now,
+        x: characterCenterX,
+        y: characterCenterY,
+        angle: currentBarrelAngle - 90 // Convert barrel rotation to movement direction
+    };
+    
+    // Send bullet data to server instead of handling locally
+    socket.emit('fireBullet', bulletData);
+    
+    lastBulletTime = now;
+}
+
+function drawBullets(){
+    bulletList.forEach((bullet, index) => {
+        const bulletElement = document.getElementById(`bullet-${bullet.id}`);
+        if (bulletElement) {
+            bulletElement.style.left = `${bullet.x}px`;
+            bulletElement.style.top = `${bullet.y}px`;
+        } else {
+            const newBulletElement = document.createElement('div');
+            newBulletElement.className = 'bullet';
+            newBulletElement.id = `bullet-${bullet.id}`;
+            newBulletElement.style.position = 'absolute';
+            newBulletElement.style.left = `${bullet.x}px`;
+            newBulletElement.style.top = `${bullet.y}px`;
+            screen.appendChild(newBulletElement);
+        }
+    });
+}
+
+// Remove bullet from client-side rendering
+function removeBullet(bulletId) {
+    const bulletElement = document.getElementById(`bullet-${bulletId}`);
+    if (bulletElement) {
+        bulletElement.remove();
+    }
+    bulletList = bulletList.filter(bullet => bullet.id !== bulletId);
+}
+
 function gameLoop() {
     const character = document.getElementById(user_id);
     if (!character) return;
@@ -50,10 +102,21 @@ function gameLoop() {
     if (pressedKeys['a']) dx -= 4;
     if (pressedKeys['d']) dx += 4;
 
+    if (x + dx < 0) dx = -x; // Prevent going off-screen left
+    if (x + dx > screen.clientWidth - 50) dx = screen.clientWidth - 50 - x;
+    if (y + dy < 0) dy = -y; // Prevent going off-screen top
+    if (y + dy > screen.clientHeight - 50) dy = screen.clientHeight - 50 - y;
+
     if (dx !== 0 || dy !== 0) {
         moveCharacter(character, x + dx, y + dy);
     }
 
+    if (pressedKeys[' ']) {
+        fireBullet();
+    }
+
+    drawBullets(); // Only draw, no longer update position locally
+    
     requestAnimationFrame(gameLoop);
 }
 
@@ -76,8 +139,10 @@ screen.addEventListener('keyup', handleKeyUp);
                 x: character.style.left,
                 y: character.style.top
             },
-            color: character.style.backgroundColor
+            color: character.style.backgroundColor,
+            barrelRotation: currentBarrelAngle,
+            bulletList: bulletList
         })
-    }, 50);
+    }, 10);
 })();
 

@@ -8,8 +8,12 @@ socket.on("message", (data) => {
   alert(`User ${data.id}, ${data.message}, ${data.timestamp}`);
 });
 
-socket.on("gameState", (data) => {
-    updateGameState(data);
+socket.on("playerUpdate", (data) => {
+    for (const playerId in data) {
+        if (playerId != undefined && playerId !== socket.id) {
+            updateGameState(data[playerId]);
+        }
+    }
 });
 
 // Handle new bullets from server
@@ -84,14 +88,14 @@ function sendGameState(gameState) {
 }
 
 function createOrUpdateCharacter(state) {
-    const user = document.getElementById(state.user_id);
+    const user = document.getElementById(state.id);
     if (user) {
         user.style.left = state.pos.x;
         user.style.top = state.pos.y;
         
         // Update barrel rotation if provided
         if (state.barrelRotation !== undefined) {
-            updateBarrelRotation(state.user_id, state.barrelRotation);
+            updateBarrelRotation(state.id, state.barrelRotation);
         }
         return
     } ;
